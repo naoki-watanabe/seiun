@@ -82,7 +82,7 @@ EOS
   end
 end
 
-@seiun.insert("TableName", SomeModel.where(category: "something"), callback_class: Mocks)
+@seiun.insert("TableName", records, callback_class: Mocks)
 
 ```
 
