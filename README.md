@@ -67,7 +67,7 @@ class Mocks
   seiun_mock_response_create_job :create_job
 
   # This gem process as receive response below
-  def create_job
+  def self.create_job
     <<EOS
 <?xml version="1.0" encoding="UTF-8"?><jobInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">
  <id>75028000000oEcVAAU</id>
@@ -80,6 +80,9 @@ class Mocks
 </jobInfo>
 EOS
   end
+end
+
+@seiun.insert("TableName", SomeModel.where(category: "something"), callback_class: Mocks)
 
 ```
 
