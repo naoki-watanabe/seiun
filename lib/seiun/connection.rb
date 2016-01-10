@@ -102,7 +102,9 @@ module Seiun
         yield
       rescue => ex
         count += 1
-        raise ex, ex.response.body if count >= times
+        if count >= times
+          ex.is_a?(Net::HTTPResponse) ? raise(ex, ex.response.body) : raise(ex)
+        end
         sleep 1
         retry
       end
