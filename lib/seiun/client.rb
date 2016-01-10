@@ -1,6 +1,6 @@
 module Seiun
   class Client
-    SEC_TO_WAIT_ASYNC = 180
+    SEC_TO_WAIT_ASYNC = 60*10
     private_constant :SEC_TO_WAIT_ASYNC
 
     def initialize(databasedotcom: nil, batch_size: 10_000)
