@@ -31,7 +31,7 @@ module Seiun
 
       def tag_end(name)
         if @stack.size == 1 && name == @find_tag
-          @callback.call(@current)
+          @callback.call(Marshal.load(Marshal.dump(@current)))
           @current, @stack = nil, []
         elsif @current
           pop_tag = @stack.pop

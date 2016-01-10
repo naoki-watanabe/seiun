@@ -22,7 +22,9 @@ module Seiun
 
       def to_s
         @callback.after_build_xml(rexml_doc) if @callback
-        super
+        str = super
+        @rexml_doc = nil
+        str
       end
 
       def add_record(parent, record)
