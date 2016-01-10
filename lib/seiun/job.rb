@@ -87,14 +87,16 @@ module Seiun
         end
         batch.job_id = response.job_id || batch.job_id
         batch.sf_state = response.state || batch.sf_state
+        batch.sf_state_message = response.state_message || batch.sf_state_message
         batch.sf_created_at = response.created_date || batch.sf_created_at
         batch.sf_updated_at = response.system_modstamp || batch.sf_updated_at
+        raise Seiun::BatchFailError, response.state_message if response.state == "Failed"
       end
     end
 
     class Batch
       attr_reader :id
-      attr_accessor :job_id, :sf_state, :sf_created_at, :sf_updated_at, :number_records_processed
+      attr_accessor :job_id, :sf_state, :sf_state_message, :sf_created_at, :sf_updated_at, :number_records_processed
 
       def initialize(id)
         @id = id

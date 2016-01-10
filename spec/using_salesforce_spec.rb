@@ -39,4 +39,11 @@ describe "Test using salesforce (developer edition)" do
       expect(@result.is_a?(Array)).to eq true
     end
   end
+
+  describe '#errors' do
+    it "query can process successfully" do
+      soql = "SELECT Id, Name, IsActive, StartDate, EndDate FROM Campaign WHERE StartDate = '2016-01-01' ORDER BY Id DESC LIMIT 10000"
+      expect{@client.query(@object_name, soql, callback_class: @callback)}.to raise_error(Seiun::BatchFailError)
+    end
+  end
 end

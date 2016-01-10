@@ -3,6 +3,7 @@ require 'rexml/parsers/baseparser'
 require 'rexml/parsers/streamparser'
 require 'rexml/streamlistener'
 require "seiun/version"
+require "seiun/error"
 require "seiun/utils"
 require "seiun/xml_generators/base"
 require "seiun/xml_generators/batch_xml"
