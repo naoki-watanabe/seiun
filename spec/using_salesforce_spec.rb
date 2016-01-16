@@ -9,18 +9,18 @@ describe "Test using salesforce (developer edition)" do
     @client = Seiun::Client.new(databasedotcom: databasedotcom)
     @callback = SeiunSpec::Callbacks::Base
     @object_name = "Campaign"
+    @records = [
+      { "Id" => "", "Name" => "Christmas Campaign 2015", "IsActive" => false,
+        "StartDate" => Date.new(2015, 11, 27), "EndDate" => Date.new(2015, 12, 31)
+      },
+      { "Id" => nil, "Name" => "Christmas Campaign 2016", "IsActive" => true,
+        "StartDate" => Date.new(2016, 11, 25), "EndDate" => Date.new(2016, 12, 31)
+      }
+    ]
   end
 
   describe '#upsert' do
     before do
-      @records = [
-        { "Id" => "", "Name" => "Christmas Campaign 2015", "IsActive" => false,
-          "StartDate" => Date.new(2015, 11, 27), "EndDate" => Date.new(2015, 12, 31)
-        },
-        { "Id" => nil, "Name" => "Christmas Campaign 2016", "IsActive" => true,
-          "StartDate" => Date.new(2016, 11, 25), "EndDate" => Date.new(2016, 12, 31)
-        }
-      ]
       @result = @client.upsert(@object_name, @records, "Id", callback_class: @callback, async: false)
     end
 
@@ -46,4 +46,20 @@ describe "Test using salesforce (developer edition)" do
       expect{@client.query(@object_name, soql, callback_class: @callback)}.to raise_error(Seiun::BatchFailError)
     end
   end
+
+  describe '#check_result' do
+    before do
+      result = @client.upsert(@object_name, @records, "Id", callback_class: @callback)
+      @job = @client.find_job(result.id, callback_class: @callback)
+    end
+
+    it "result check process successfully" do
+      results = []
+      @job.each_result do |res|
+        results << res
+      end
+      expect(results.all?{|r| r["success"] == true }).to eq true
+    end
+  end
+
 end

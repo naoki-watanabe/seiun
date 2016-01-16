@@ -2,8 +2,8 @@ module Seiun
   module XMLParsers
     class ResultXML < Base
       class << self
-        def each(xml_str, &block)
-          parse(xml_str, "result", block)
+        def each(xml_str, find_tag: "result", &block)
+          parse(xml_str, find_tag, block)
         end
       end
 
@@ -12,7 +12,7 @@ module Seiun
         result
       end
 
-      [ :id, :success ].each do |name|
+      [ :id, :success, :created ].each do |name|
         define_method name do
           return unless result.is_a?(Hash)
           result[Seiun::Utils.camelize(name)]

@@ -1,14 +1,20 @@
 module Seiun
   class Job
-    attr_reader :operation
+    SEC_TO_WAIT = 60*10  # 10 minutes
+    private_constant :SEC_TO_WAIT
 
-    def initialize(connection, operation, object_name, id: nil, ext_field_name: nil, callback: nil)
+    attr_reader :id
+
+    def initialize(connection, operation: nil, object_name: nil, id: nil, ext_field_name: nil, callback: nil)
       @connection = connection
-      @operation = operation
-      @object_name = object_name
-      @id = id if id
-      @ext_field_name = ext_field_name if ext_field_name
-      @callback = callback
+      @operation = operation.to_sym if operation
+      @object_name = object_name.to_s if object_name
+      @id = id
+      @ext_field_name = ext_field_name
+      if callback
+        callback.job = self
+        @callback = callback
+      end
       @batches = []
     end
 
@@ -32,31 +38,71 @@ module Seiun
       parse_batch_xml(response_body)
     end
 
+    def each_result
+      wait_finish
+      batches.each do |batch|
+        result_response_body = @connection.get_result(@id, batch.id, callback: @callback)
+        Seiun::XMLParsers::ResultXML.each(result_response_body) do |result_response|
+          if query?
+            response_body = @connection.get_query_result(@id, batch.id, result_response.result_id, callback: @callback)
+            Seiun::XMLParsers::RecordXML.each(response_body) do |response|
+              yield(response.to_hash)
+            end
+          else
+            yield(result_response.to_hash)
+          end
+        end
+      end
+    end
+
+    def get_results
+      results = []
+      each_result{|res| results << res }
+      results
+    end
+
+    def operation(get: true)
+      return @operation if @operation || get == false
+      get_job_details
+      @operation
+    end
+
+    def sf_state(get: true)
+      return @sf_state if @sf_state || get == false
+      get_job_details
+      @sf_state
+    end
+
+    def batches(get: true)
+      return @batches if !@batches.empty? || get == false
+      get_batch_details
+      @batches
+    end
+
+    def wait_finish
+      Timeout.timeout(sec_to_wait_finish) do
+        until closed?
+          get_job_details
+          sleep 1
+        end
+        until all_batch_finished?
+          get_batch_details
+          sleep 1
+        end
+      end
+    end
+
+    private
+
+    def get_job_details
+      response_body = @connection.get_job_details(@id, callback: @callback)
+      parse_job_xml(response_body)
+    end
+
     def get_batch_details
       response_body = @connection.get_batch_details(@id, callback: @callback)
       parse_batch_xml(response_body)
     end
-
-    def get_query_result
-      result = []
-      @batches.each do |batch|
-        result_response_body = @connection.get_result(@id, batch.id, callback: @callback)
-        Seiun::XMLParsers::ResultXML.each(result_response_body) do |result_response|
-          response_body = @connection.get_query_result(@id, batch.id, result_response.result_id, callback: @callback)
-          Seiun::XMLParsers::RecordXML.each(response_body) do |response|
-            result << response.to_hash
-          end
-        end
-      end
-      result
-    end
-
-    def all_batch_finished?
-      raise "Batches are empty" if @batches.empty?
-      @batches.all?{|batch| !["Queued", "InProgress"].include?(batch.sf_state) }
-    end
-
-    private
 
     def create_job_xml
       Seiun::XMLGenerators::JobXML.create_job(@operation, @object_name, ext_field_name: @ext_field_name, callback: @callback)
@@ -72,7 +118,9 @@ module Seiun
 
     def parse_job_xml(response_body)
       Seiun::XMLParsers::JobXML.each(response_body) do |response|
-        @id = response.id || @id
+        @id ||= response.id
+        @operation = ( @operation || response.operation ).to_sym
+        @object_name ||= response.object
         @sf_created_at = response.created_date || @sf_created_at
         @sf_updated_at = response.system_modstamp || @sf_updated_at
         @sf_state = response.state || @sf_state
@@ -92,6 +140,25 @@ module Seiun
         batch.sf_updated_at = response.system_modstamp || batch.sf_updated_at
         raise Seiun::BatchFailError, response.state_message if response.state == "Failed"
       end
+    end
+
+    def sec_to_wait_finish
+      SEC_TO_WAIT
+    end
+
+    def closed?
+      sf_state == "Closed"
+    end
+
+    [ :insert, :update, :upsert, :delete, :query ].each do |symbol|
+      define_method "#{symbol}?" do
+        @operation == symbol
+      end
+    end
+
+    def all_batch_finished?
+      return true if batches.empty?
+      batches.all?{|batch| !["Queued", "InProgress"].include?(batch.sf_state) }
     end
 
     class Batch

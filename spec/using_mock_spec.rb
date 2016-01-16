@@ -428,4 +428,39 @@ describe "Test using mock" do
       expect($1).to eq result_id.to_s
     end
   end
+
+  describe "#check_result" do
+    before do
+      @records = [
+        @callback.new("Id" => "001D000000ISUr3IAH", "Name" => "Christmas Campaign 2015", "IsActive" => false,
+          "Parent" => { "Name" => "Christmas Campaigns" },
+          "StartDate" => Date.new(2015, 11, 27), "EndDate" => Date.new(2015, 12, 31),
+          "TimeField__c" => Time.local(2015, 11, 1, 9, 0, 0),
+          "MultiSelectField__c" => [ "Selection1", "Selection2" ], "NullField__c" => nil
+        ),
+        @callback.new("Id" => nil, "Name" => "Christmas Campaign 2016", "IsActive" => true,
+          "Parent" => { "Name" => "Christmas Campaigns" },
+          "StartDate" => Date.new(2016, 11, 25), "EndDate" => Date.new(2016, 12, 31),
+          "TimeField__c" => DateTime.new(2016, 11, 1, 9, 0, 0),
+          "MultiSelectField__c" => [ "Selection1" ], "NullField__c" => nil
+        )
+      ]
+      upsert_job = @client.upsert(@object_name, @records, "Id", callback_class: SeiunSpec::Callbacks::WithMock)
+      @callback.init
+      check_job = @client.find_job(upsert_job.id, callback_class: @callback)
+      @results = []
+      check_job.each_result do |hash|
+        @results << hash
+      end
+    end
+
+    it "connect selesforce to check" do
+      expect(@callback.paths.keys).to eq [:get_job_details, :get_batch_details, :get_result]
+    end
+
+    it "get success" do
+      successes = @results.map{|r| r["success"] }
+      expect(successes.all?{|s| [true, false].include?(s) }).to eq true
+    end
+  end
 end
