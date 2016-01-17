@@ -15,7 +15,7 @@ module SeiunSpec
       seiun_mock_response_get_query_result  :get_query_result  
 
       class << self
-        def create_job
+        def create_job(operation: nil)
           <<EOS
 <?xml version="1.0" encoding="UTF-8"?><jobInfo
    xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -45,7 +45,7 @@ module SeiunSpec
 EOS
         end
 
-        def close_job
+        def close_job(operation: nil)
           <<EOS
 <?xml version="1.0" encoding="UTF-8"?><jobInfo
    xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -75,11 +75,11 @@ EOS
 EOS
         end
 
-        def add_query
+        def add_query(operation: nil)
           add_batch
         end
 
-        def add_batch
+        def add_batch(operation: nil)
           <<EOS
 <?xml version="1.0" encoding="UTF-8"?><batchInfo
    xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -97,7 +97,37 @@ EOS
 EOS
         end
 
-        def get_batch_details
+        def get_job_details(operation: nil)
+          <<EOS
+<?xml version="1.0" encoding="UTF-8"?><jobInfo
+   xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+ <id>75028000000oEcaAAE</id>
+ <operation>upsert</operation>
+ <object>Campaign</object>
+ <createdById>00528000001lckgAAA</createdById>
+ <createdDate>2016-01-15T18:46:30.000Z</createdDate>
+ <systemModstamp>2016-01-15T18:46:30.000Z</systemModstamp>
+ <state>Closed</state>
+ <externalIdFieldName>Id</externalIdFieldName>
+ <concurrencyMode>Parallel</concurrencyMode>
+ <contentType>XML</contentType>
+ <numberBatchesQueued>0</numberBatchesQueued>
+ <numberBatchesInProgress>0</numberBatchesInProgress>
+ <numberBatchesCompleted>1</numberBatchesCompleted>
+ <numberBatchesFailed>0</numberBatchesFailed>
+ <numberBatchesTotal>1</numberBatchesTotal>
+ <numberRecordsProcessed>2</numberRecordsProcessed>
+ <numberRetries>0</numberRetries>
+ <apiVersion>35.0</apiVersion>
+ <numberRecordsFailed>0</numberRecordsFailed>
+ <totalProcessingTime>130</totalProcessingTime>
+ <apiActiveProcessingTime>77</apiActiveProcessingTime>
+ <apexProcessingTime>0</apexProcessingTime>
+</jobInfo>
+EOS
+        end
+
+        def get_batch_details(operation: nil)
           <<EOS
 <?xml version="1.0" encoding="UTF-8"?><batchInfoList
    xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -117,15 +147,36 @@ EOS
 EOS
         end
 
-        def get_result
-          <<EOS.gsub(/>\s+</, '><')
+        def get_result(operation: nil)
+          if operation == :query
+            <<EOS.gsub(/>\s+</, '><')
 <result-list xmlns="http://www.force.com/2009/06/asyncapi/dataload">
   <result>75228000000YhJP</result>
 </result-list>
 EOS
+          else
+            <<EOS.gsub(/>\s+</, '><')
+<?xml version="1.0" encoding="UTF-8"?>
+<results xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+  <result>
+    <id>70128000000bMzZAAU</id>
+    <success>true</success>
+    <created>true</created>
+  </result>
+  <result>
+    <errors>
+      <message>Something Error</message>
+      <statusCode>SOMETHING_ERROR</statusCode>
+    </errors>
+    <success>false</success>
+    <created>true</created>
+  </result>
+</results>
+EOS
+          end
         end
 
-        def get_query_result
+        def get_query_result(operation: nil)
           <<EOS.gsub(/>\s+</, '><')
 <?xml version="1.0" encoding="UTF-8"?>
 <queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

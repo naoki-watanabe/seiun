@@ -20,6 +20,10 @@ module Seiun
       connect(:add_batch, data: data, job_id: job_id, callback: callback)
     end
 
+    def get_job_details(job_id, callback: nil)
+      connect(:get_job_details, job_id: job_id, callback: callback)
+    end
+
     def get_batch_details(job_id, callback: nil)
       connect(:get_batch_details, job_id: job_id, callback: callback)
     end
@@ -67,7 +71,7 @@ module Seiun
       case type
       when :create_job
         "/services/async/#{api_version}/job"
-      when :close_job
+      when :close_job, :get_job_details
         "/services/async/#{api_version}/job/#{job_id}"
       when :add_query, :add_batch, :get_batch_details
         "/services/async/#{api_version}/job/#{job_id}/batch"

@@ -5,6 +5,10 @@ module Seiun
         @class = callback_class
       end
 
+      def job=(job)
+        @job = job
+      end
+
       def after_build_xml(xml)
         return unless callback_defined?(:after_build_xml)
         @class.__send__(callbacks[:after_build_xml], xml)
@@ -27,45 +31,49 @@ module Seiun
 
       def mock_response_create_job
         return unless callback_defined?(:mock_response_create_job)
-        @class.__send__(callbacks[:mock_response_create_job])
+        @class.__send__(callbacks[:mock_response_create_job], operation: operation)
       end
 
       def mock_response_close_job
         return unless callback_defined?(:mock_response_close_job)
-        @class.__send__(callbacks[:mock_response_close_job])
+        @class.__send__(callbacks[:mock_response_close_job], operation: operation)
       end
 
       def mock_response_add_query
         return unless callback_defined?(:mock_response_add_query)
-        @class.__send__(callbacks[:mock_response_add_query])
+        @class.__send__(callbacks[:mock_response_add_query], operation: operation)
       end
 
       def mock_response_add_batch
         return unless callback_defined?(:mock_response_add_batch)
-        @class.__send__(callbacks[:mock_response_add_batch])
+        @class.__send__(callbacks[:mock_response_add_batch], operation: operation)
       end
 
       def mock_response_get_job_details
         return unless callback_defined?(:mock_response_get_job_details)
-        @class.__send__(callbacks[:mock_response_get_job_details])
+        @class.__send__(callbacks[:mock_response_get_job_details], operation: operation)
       end
 
       def mock_response_get_batch_details
         return unless callback_defined?(:mock_response_get_batch_details)
-        @class.__send__(callbacks[:mock_response_get_batch_details])
+        @class.__send__(callbacks[:mock_response_get_batch_details], operation: operation)
       end
 
       def mock_response_get_result
         return unless callback_defined?(:mock_response_get_result)
-        @class.__send__(callbacks[:mock_response_get_result])
+        @class.__send__(callbacks[:mock_response_get_result], operation: operation)
       end
 
       def mock_response_get_query_result
         return unless callback_defined?(:mock_response_get_query_result)
-        @class.__send__(callbacks[:mock_response_get_query_result])
+        @class.__send__(callbacks[:mock_response_get_query_result], operation: operation)
       end
 
       private
+
+      def operation
+        @job.operation(get: false)
+      end
 
       def callback_defined?(name)
         !!callbacks[name]

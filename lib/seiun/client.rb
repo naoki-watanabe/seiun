@@ -1,8 +1,5 @@
 module Seiun
   class Client
-    SEC_TO_WAIT_ASYNC = 60*10
-    private_constant :SEC_TO_WAIT_ASYNC
-
     def initialize(databasedotcom: nil, batch_size: 10_000)
       @batch_size = batch_size
       @connection = Seiun::Connection.new(databasedotcom)
@@ -57,30 +54,26 @@ module Seiun
       operate(:query, table_name, soql: soql, callback: callback_class)      
     end
 
+    def find_job(id, callback_class: nil)
+      callback_class = wrap_callback(callback_class)
+      Seiun::Job.new(@connection, id: id, callback: callback_class)
+    end
+
     private
 
     def operate(operation, object, records: [], soql: "", ext_field_name: nil, callback: nil, async: true)
-      callback = Seiun::Callback::Wrapper.new(callback) if callback
+      callback = wrap_callback(callback)
       records = records.map{|r| Seiun::Callback::RecordWrapper.new(r) }
-      job = Seiun::Job.new(@connection, operation, object, ext_field_name: ext_field_name, callback: callback)
+      job = Seiun::Job.new(@connection, operation: operation, object_name: object, ext_field_name: ext_field_name, callback: callback)
       job.post_creation
       operation == :query ? job.add_query(soql) : records.each_slice(@batch_size).each{|chunk| job.add_batch(chunk) }
       job.post_closing
-      wait_asyc(job) if operation == :query || async == false
-      operation == :query ? job.get_query_result : job
+      job.wait_finish if async == false
+      operation == :query ? job.get_results : job
     end
 
-    def wait_asyc(job)
-      Timeout.timeout(sec_to_wait_async) do
-        until job.all_batch_finished?
-          job.get_batch_details
-          sleep 1
-        end
-      end
-    end
-
-    def sec_to_wait_async
-      SEC_TO_WAIT_ASYNC
+    def wrap_callback(callback)
+      Seiun::Callback::Wrapper.new(callback) if callback
     end
   end
 end
