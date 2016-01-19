@@ -2,6 +2,8 @@ module SeiunSpec
   module Callbacks
     class WithMock < Base
       seiun_hashalize :hashalize
+      seiun_before_build_xml :before_build_xml
+      seiun_after_build_xml :after_build_xml
       seiun_before_request :before_request
       seiun_after_response :after_response
 
