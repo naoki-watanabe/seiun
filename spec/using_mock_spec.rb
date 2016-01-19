@@ -71,6 +71,14 @@ describe "Test using mock" do
       expect(multi_select_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["MultiSelectField__c"].join(";") }.sort{|a,b| a.to_s <=> b.to_s}
       expect(null_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["NullField__c"] }.sort{|a,b| a.to_s <=> b.to_s}
     end
+
+    it "before_build_xml callback returns records" do
+      expect(@callback.records.map{|r| r.instance_variable_get(:@record) }).to eq @records
+    end
+
+    it "after_build_xml callback returns REXML::Document" do
+      expect(@callback.xml_size).to eq @records.size
+    end
   end
 
   describe '#insert' do
@@ -248,6 +256,14 @@ describe "Test using mock" do
       expect(multi_select_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["MultiSelectField__c"].join(";") }.sort{|a,b| a.to_s <=> b.to_s}
       expect(null_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["NullField__c"] }.sort{|a,b| a.to_s <=> b.to_s}
     end
+
+    it "before_build_xml callback returns records" do
+      expect(@callback.records.map{|r| r.instance_variable_get(:@record) }).to eq @records
+    end
+
+    it "after_build_xml callback returns REXML::Document" do
+      expect(@callback.xml_size).to eq @records.size
+    end
   end
 
   describe '#insert_queue' do
@@ -321,6 +337,14 @@ describe "Test using mock" do
       expect(multi_select_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["MultiSelectField__c"].join(";") }.sort{|a,b| a.to_s <=> b.to_s}
       expect(null_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["NullField__c"] }.sort{|a,b| a.to_s <=> b.to_s}
     end
+
+    it "before_build_xml callback returns records" do
+      expect(@callback.records.map{|r| r.instance_variable_get(:@record) }).to eq @records
+    end
+
+    it "after_build_xml callback returns REXML::Document" do
+      expect(@callback.xml_size).to eq @records.size
+    end
   end
 
   describe '#update_queue' do
@@ -364,6 +388,14 @@ describe "Test using mock" do
         ids << response.to_hash["Id"]
       end
       expect(ids.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["Id"] }.sort{|a,b| a.to_s <=> b.to_s}
+    end
+
+    it "before_build_xml callback returns records" do
+      expect(@callback.records.map{|r| r.instance_variable_get(:@record) }).to eq @records
+    end
+
+    it "after_build_xml callback returns REXML::Document" do
+      expect(@callback.xml_size).to eq @records.size
     end
   end
 

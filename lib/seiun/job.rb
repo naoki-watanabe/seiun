@@ -113,6 +113,7 @@ module Seiun
     end
 
     def add_batch_xml(records)
+      @callback.before_build_xml(records) if @callback
       Seiun::XMLGenerators::BatchXML.add_batch(records, callback: @callback)
     end
 
