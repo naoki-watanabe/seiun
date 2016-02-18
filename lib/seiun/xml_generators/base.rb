@@ -11,13 +11,19 @@ module Seiun
         io = StringIO.new
         rexml_doc.write(io)
         io.rewind
-        io.read
+        str = io.read
+        io = nil
+        str
       end
 
       private
 
       def rexml_doc
         @rexml_doc
+      end
+
+      def clear_rexml_doc!
+        @rexml_doc = nil
       end
     end
   end

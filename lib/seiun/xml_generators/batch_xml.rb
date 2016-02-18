@@ -15,16 +15,17 @@ module Seiun
         records.each do |record|
           add_record(sobjects, record)
         end
-        to_s
+        str = to_s
+        sobjects = nil
+        clear_rexml_doc!
+        str
       end
 
       private
 
       def to_s
         @callback.after_build_xml(rexml_doc) if @callback
-        str = super
-        @rexml_doc = nil
-        str
+        super
       end
 
       def add_record(parent, record)
