@@ -21,11 +21,13 @@ module Seiun
     def post_creation
       response_body = @connection.create_job(create_job_xml, callback: @callback)
       parse_job_xml(response_body)
+      @callback.after_create_job(self) if @callback
     end
 
     def post_closing
       response_body = @connection.close_job(close_job_xml, @id, callback: @callback)
       parse_job_xml(response_body)
+      @callback.after_close_job(self) if @callback
     end
 
     def add_query(soql)

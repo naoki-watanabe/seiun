@@ -72,6 +72,16 @@ describe "Test using mock" do
       expect(null_fields.sort{|a,b| a.to_s <=> b.to_s}).to eq @records.map{|c| c.hashalize["NullField__c"] }.sort{|a,b| a.to_s <=> b.to_s}
     end
 
+    it "after_create_job callback returns jobs" do
+      expect(@callback.created_jobs[0].class).to eq Seiun::Job
+      expect(@callback.created_jobs[0].id).to eq "75028000000oEcVAAU"
+    end
+
+    it "after_close_job callback returns jobs" do
+      expect(@callback.closed_jobs[0].class).to eq Seiun::Job
+      expect(@callback.closed_jobs[0].id).to eq "75028000000oEcVAAU"
+    end
+
     it "before_build_xml callback returns records" do
       expect(@callback.records.map{|r| r.instance_variable_get(:@record) }).to eq @records
     end

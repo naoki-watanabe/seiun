@@ -9,6 +9,16 @@ module Seiun
         @job = job
       end
 
+      def after_create_job(job)
+        return unless callback_defined?(:after_create_job)
+        @class.__send__(callbacks[:after_create_job], job)
+      end
+
+      def after_close_job(job)
+        return unless callback_defined?(:after_close_job)
+        @class.__send__(callbacks[:after_close_job], job)
+      end
+
       def before_build_xml(records)
         return unless callback_defined?(:before_build_xml)
         @class.__send__(callbacks[:before_build_xml], records)
