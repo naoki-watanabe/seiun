@@ -61,6 +61,12 @@ module Seiun
       results
     end
 
+    def object_name(get: true)
+      return @object_name if @object_name || get == false
+      get_job_details
+      @object_name
+    end
+
     def operation(get: true)
       return @operation if @operation || get == false
       get_job_details
@@ -90,6 +96,10 @@ module Seiun
           sleep 1
         end
       end
+    end
+
+    def closed?
+      sf_state == "Closed"
     end
 
     private
@@ -145,10 +155,6 @@ module Seiun
 
     def sec_to_wait_finish
       SEC_TO_WAIT
-    end
-
-    def closed?
-      sf_state == "Closed"
     end
 
     [ :insert, :update, :upsert, :delete, :query ].each do |symbol|
