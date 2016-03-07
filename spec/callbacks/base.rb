@@ -3,6 +3,8 @@ module SeiunSpec
     class Base
       include Seiun::Callback::Extends
   
+      seiun_after_create_job :after_create_job
+      seiun_after_close_job :after_close_job
       seiun_before_build_xml :before_build_xml
       seiun_after_build_xml :after_build_xml
       seiun_before_request :before_request
@@ -10,13 +12,23 @@ module SeiunSpec
       seiun_ssl_verify_none :ssl_verify_none?
 
       class << self
-        attr_reader :paths, :requests, :responses, :records, :xml_size
+        attr_reader :created_jobs, :closed_jobs, :paths, :requests, :responses, :records, :xml_size
 
         def init
           @paths, @requests, @responses, @records, @xml_size = nil, nil, nil, nil, nil
         end
 
         private
+
+        def after_create_job(job)
+          @created_jobs = []
+          @created_jobs << job.dup
+        end
+
+        def after_close_job(job)
+          @closed_jobs = []
+          @closed_jobs << job.dup
+        end
 
         def before_build_xml(records)
           @records = records

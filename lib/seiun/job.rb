@@ -21,11 +21,13 @@ module Seiun
     def post_creation
       response_body = @connection.create_job(create_job_xml, callback: @callback)
       parse_job_xml(response_body)
+      @callback.after_create_job(self) if @callback
     end
 
     def post_closing
       response_body = @connection.close_job(close_job_xml, @id, callback: @callback)
       parse_job_xml(response_body)
+      @callback.after_close_job(self) if @callback
     end
 
     def add_query(soql)
@@ -61,6 +63,12 @@ module Seiun
       results
     end
 
+    def object_name(get: true)
+      return @object_name if @object_name || get == false
+      get_job_details
+      @object_name
+    end
+
     def operation(get: true)
       return @operation if @operation || get == false
       get_job_details
@@ -90,6 +98,10 @@ module Seiun
           sleep 1
         end
       end
+    end
+
+    def closed?
+      sf_state == "Closed"
     end
 
     private
@@ -145,10 +157,6 @@ module Seiun
 
     def sec_to_wait_finish
       SEC_TO_WAIT
-    end
-
-    def closed?
-      sf_state == "Closed"
     end
 
     [ :insert, :update, :upsert, :delete, :query ].each do |symbol|
