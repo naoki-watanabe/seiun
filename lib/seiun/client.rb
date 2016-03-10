@@ -62,6 +62,7 @@ module Seiun
     private
 
     def operate(operation, object, records: [], soql: "", ext_field_name: nil, callback: nil, async: true)
+      return if operation != :query && records.empty?
       callback = wrap_callback(callback)
       records = records.map{|r| Seiun::Callback::RecordWrapper.new(r) }
       job = Seiun::Job.new(@connection, operation: operation, object_name: object, ext_field_name: ext_field_name, callback: callback)
