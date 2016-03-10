@@ -91,6 +91,21 @@ describe "Test using mock" do
     end
   end
 
+  describe '#empty upsert'  do
+    it "if upsert records are empty, returns nil" do
+      res = @client.upsert(@object_name, [], "Id", callback_class: @callback)
+      expect(@callback.requests).to eq nil
+      expect(res).to eq nil
+    end
+
+    it "if upsert queue records are empty, returns nil" do
+      queue = @client.upsert_queue(@object_name, "Id", callback_class: @callback)
+      res = queue.close
+      expect(@callback.requests).to eq nil
+      expect(res).to eq []
+    end
+  end
+
   describe '#insert' do
     before do
       @records = [

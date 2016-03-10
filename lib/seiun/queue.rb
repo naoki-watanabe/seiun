@@ -19,7 +19,7 @@ module Seiun
 
     def close
       operate
-      @jobs
+      @jobs.compact
     end
 
     private
