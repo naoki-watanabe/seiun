@@ -1,4 +1,4 @@
-![Seiun](https://s3-ap-northeast-1.amazonaws.com/naoki-watanabe/GitHub/seiun_20160101.jpg)
+![Seiun](https://watanabe-naoki.s3-ap-northeast-1.amazonaws.com/seiun/seiun_20160101.jpg)
 
 ## What's this?
 
